@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AutoCare Hub Mobile App</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&family=Poppins:wght=500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .theme-transition {
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Print optimization styling block for real PDF conversion */
+        @media print {
+            body * { visibility: hidden; }
+            #printInvoiceArea, #printInvoiceArea * { visibility: visible; }
+            #printInvoiceArea { position: absolute; left: 0; top: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 h-screen w-screen overflow-hidden flex flex-col theme-transition">
+
+    <div id="loginPage" class="fixed inset-0 z-50 flex flex-col justify-center items-center px-6 bg-white dark:bg-slate-900 transition-all duration-300">
+        <div class="w-full max-w-sm space-y-6">
+            <div class="text-center">
+                <div class="inline-flex mb-2 overflow-hidden rounded-2xl bg-white dark:bg-slate-800 p-2 shadow-xl border border-slate-100 dark:border-slate-800">
+                    <img id="loginLogoImage" src="WhatsApp Image 2026-06-09 at 11.53.14 PM.jpeg" onerror="this.src='https://placehold.co/120x120?text=AutoCare+Hub'" class="w-24 h-24 object-contain rounded-xl" alt="AutoCare Hub Logo">
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-heading">AutoCare <span class="text-orange-500">Hub</span></h1>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Workshop Management App Gateway</p>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/50 p-4 rounded-2xl space-y-2">
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Select Simulated Account Credentials:</p>
+                <button onclick="autofillLogin('admin@autocare.com')" class="w-full text-left bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold flex justify-between items-center cursor-pointer text-slate-700 dark:text-slate-200">
+                    <span>🚨 System Administrator</span><span class="text-[10px] bg-red-50 dark:bg-red-950/50 text-red-600 px-1.5 py-0.5 rounded-md">Owner</span>
+                </button>
+                <button onclick="autofillLogin('staff@autocare.com')" class="w-full text-left bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold flex justify-between items-center cursor-pointer text-slate-700 dark:text-slate-200">
+                    <span>🛠️ Workshop Technician</span><span class="text-[10px] bg-blue-50 dark:bg-blue-950/50 text-blue-600 px-1.5 py-0.5 rounded-md">Staff</span>
+                </button>
+                <button onclick="autofillLogin('ahmad@customer.com')" class="w-full text-left bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold flex justify-between items-center cursor-pointer text-slate-700 dark:text-slate-200">
+                    <span>🚗 Ahmad Firdaus</span><span class="text-[10px] bg-orange-50 dark:bg-orange-950/50 text-orange-600 px-1.5 py-0.5 rounded-md">Customer</span>
+                </button>
+            </div>
+
+            <form id="authForm" onsubmit="handleSecureLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">System User Identity</label>
+                    <input type="email" id="loginEmail" required class="w-full bg-slate-50 dark:bg-slate-800 text-sm border border-slate-200 dark:border-slate-700 rounded-xl p-3 focus:outline-none focus:border-orange-500 dark:text-white" placeholder="username@domain.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Access Key</label>
+                    <input type="password" id="loginPassword" value="password" required class="w-full bg-slate-50 dark:bg-slate-800 text-sm border border-slate-200 dark:border-slate-700 rounded-xl p-3 focus:outline-none focus:border-orange-500 dark:text-white">
+                </div>
+                <div id="loginErrorMsg" class="hidden text-xs text-red-500 font-medium flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-exclamation"></i> Invalid verification profiles. Check credentials.
+                </div>
+                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl shadow-lg transition-all cursor-pointer">Authenticate Device</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="appContainer" class="hidden flex-1 flex flex-col md:flex-row h-full overflow-hidden relative">
+        
+        <aside id="sideNav" class="w-64 fixed md:relative inset-y-0 left-0 transform translate-x-0 md:translate-x-0 transition-transform duration-300 ease-in-out bg-slate-900 text-slate-200 flex flex-col justify-between z-30 border-r border-slate-800">
+            <div>
+                <div class="p-4 flex items-center gap-3 border-b border-slate-800">
+                    <div class="w-10 h-10 overflow-hidden rounded-xl bg-white flex items-center justify-center shrink-0 p-1">
+                        <img id="dashboardLogoImage" src="WhatsApp Image 2026-06-09 at 11.53.14 PM.jpeg" onerror="this.src='https://placehold.co/120x120?text=AC'" class="w-full h-full object-contain" alt="Logo">
+                    </div>
+                    <div>
+                        <h1 class="text-sm font-bold tracking-wider text-white font-heading">AutoCare Hub</h1>
+                        <p class="text-[10px] text-slate-500">System Platform Ready</p>
+                    </div>
+                </div>
+
+                <nav id="navLinksWrapper" class="px-3 py-4 space-y-1">
+                    <a href="#" onclick="switchSection('dashboard')" id="nav-dashboard" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all">
+                        <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
+                    </a>
+                    <a href="#" onclick="switchSection('customers')" id="nav-customers" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all">
+                        <i class="fa-solid fa-users w-5 text-center"></i> Customers & Cars
+                    </a>
+                    <a href="#" onclick="switchSection('bookings')" id="nav-bookings" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all">
+                        <i class="fa-solid fa-calendar-check w-5 text-center"></i> Appointments
+                    </a>
+                    <a href="#" onclick="switchSection('history')" id="nav-history" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all">
+                        <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i> Service History
+                    </a>
+                    <a href="#" onclick="switchSection('catalog')" id="nav-catalog" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all">
+                        <i class="fa-solid fa-tags w-5 text-center"></i> Service Catalog
+                    </a>
+                    <a href="#" onclick="switchSection('reports')" id="nav-reports" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all">
+                        <i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i> PDF Reports
+                    </a>
+                </nav>
+            </div>
+
+            <div class="p-4 border-t border-slate-800 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 text-xs font-bold border border-slate-700">
+                        <i id="userProfileFooterIcon" class="fa-solid fa-user"></i>
+                    </div>
+                    <div class="truncate max-w-[120px]">
+                        <p id="footerUserName" class="text-xs font-bold text-white leading-none">Profile</p>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wide">Verified</span>
+                    </div>
+                </div>
+                <button onclick="handleSecureLogout()" class="text-slate-500 hover:text-red-400 transition-all p-1.5 rounded-lg cursor-pointer" title="Log Out Session">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col h-full overflow-hidden transition-all duration-300">
+            
+            <header class="h-14 md:h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-6 shrink-0 theme-transition z-10">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebarMenuLayout()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all cursor-pointer" title="Toggle Sidebar Structure">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <h2 id="pageTitle" class="text-sm md:text-lg font-bold text-slate-800 dark:text-white font-heading">Dashboard Overview</h2>
+                    <span id="roleBadge" class="text-[9px] md:text-xs font-bold px-2 py-0.5 rounded-full border tracking-wide uppercase">Badge</span>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleGlobalDisplayTheme()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-amber-400 transition-all cursor-pointer" title="Switch Theme Matrix">
+                        <i id="themeToggleIcon" class="fa-solid fa-moon"></i>
+                    </button>
+
+                    <button onclick="handleSecureLogout()" class="md:hidden w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/20 text-red-500 border border-red-100 dark:border-red-900/30 flex items-center justify-center text-sm cursor-pointer">
+                        <i class="fa-solid fa-power-off"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 no-scrollbar space-y-6">
+
+                <section id="section-dashboard" class="space-y-6">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="metricsGrid">
+                        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm theme-transition">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p id="totalCustLabel" class="text-[10px] md:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Active Clients</p>
+                                    <h3 id="stat-customers" class="text-xl md:text-2xl font-bold mt-2 text-slate-800 dark:text-white">0</h3>
+                                </div>
+                                <span class="bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 p-2 rounded-xl"><i class="fa-solid fa-users text-xs"></i></span>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm theme-transition">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p id="totalBookingLabel" class="text-[10px] md:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Bookings Slotted</p>
+                                    <h3 id="stat-bookings" class="text-xl md:text-2xl font-bold mt-2 text-slate-800 dark:text-white">0</h3>
+                                </div>
+                                <span class="bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 p-2 rounded-xl"><i class="fa-solid fa-calendar-days text-xs"></i></span>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm theme-transition">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-[10px] md:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Top Service Tier</p>
+                                    <h3 class="text-xs font-bold mt-2.5 text-slate-800 dark:text-white truncate">Engine Oil Tune</h3>
+                                </div>
+                                <span class="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-xl"><i class="fa-solid fa-fire text-xs"></i></span>
+                            </div>
+                        </div>
+                        <div id="financialCard" class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm theme-transition">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-[10px] md:text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Gross Income Summary</p>
+                                    <h3 id="stat-revenue" class="text-xl md:text-2xl font-bold mt-2 text-emerald-600 dark:text-emerald-400">RM 0</h3>
+                                </div>
+                                <span class="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 p-2 rounded-xl"><i class="fa-solid fa-wallet text-xs"></i></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm theme-transition">
+                            <h3 id="tableGridTitle" class="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2 text-sm"><i class="fa-solid fa-clock text-orange-500"></i> Active Service Intake Line</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs md:text-sm">
+                                    <thead>
+                                        <tr class="text-slate-400 dark:text-slate-500 uppercase text-[9px] font-bold tracking-wider border-b border-slate-100 dark:border-slate-800">
+                                            <th class="pb-3">Plate No</th>
+                                            <th class="pb-3 text-cust-hide">Client Details</th>
+                                            <th class="pb-3">Assigned Service</th>
+                                            <th class="pb-3">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dashboardTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 font-medium text-slate-600 dark:text-slate-300">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div id="diagnosticCard" class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-between theme-transition">
+                            <div>
+                                <h3 class="font-bold text-slate-800 dark:text-white text-sm">Workshop Capacity Diagnostics</h3>
+                                <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Active resource load capacity index logs</p>
+                                <div class="space-y-4 mt-6">
+                                    <div>
+                                        <div class="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 mb-1"><span>Mechanical Bays</span><span>75%</span></div>
+                                        <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full"><div class="bg-orange-500 h-1.5 rounded-full" style="width: 75%"></div></div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 mb-1"><span>Electrical Diagnostic Units</span><span>40%</span></div>
+                                        <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full"><div class="bg-blue-500 h-1.5 rounded-full" style="width: 40%"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="section-customers" class="hidden space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm theme-transition h-fit">
+                            <h3 class="font-bold text-sm text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i class="fa-solid fa-square-plus text-orange-500"></i> Onboard Vehicle</h3>
+                            <form id="vehicleRegForm" onsubmit="handleRegisterVehicle(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Owner Name</label>
+                                    <input type="text" id="regName" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs focus:outline-none focus:border-orange-500 dark:text-white" placeholder="e.g. Ahmad Firdaus">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Contact No</label>
+                                        <input type="tel" id="regPhone" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs focus:outline-none focus:border-orange-500 dark:text-white" placeholder="0123456789">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Plate Reg No</label>
+                                        <input type="text" id="regPlate" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs focus:outline-none focus:border-orange-500 dark:text-white" placeholder="WXB 8821">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Brand Make</label>
+                                        <input type="text" id="regBrand" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs focus:outline-none focus:border-orange-500 dark:text-white" placeholder="Proton">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Model Variant</label>
+                                        <input type="text" id="regModel" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs focus:outline-none focus:border-orange-500 dark:text-white" placeholder="X50">
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full bg-orange-500 text-white text-xs font-semibold py-3 rounded-xl shadow-lg cursor-pointer">Commit Directory Records</button>
+                            </form>
+                        </div>
+
+                        <div class="lg:col-span-2 bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm theme-transition">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-sm text-slate-800 dark:text-white">Master Registry Files</h3>
+                                <input type="text" id="searchVehicleInput" oninput="filterVehicleDirectory()" class="w-40 md:w-56 bg-slate-50 dark:bg-slate-800 text-xs px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none dark:text-white" placeholder="Search plate or names...">
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="text-slate-400 dark:text-slate-500 uppercase text-[9px] font-bold tracking-wider border-b border-slate-100 dark:border-slate-800">
+                                            <th class="pb-3">Owner Specifications</th>
+                                            <th class="pb-3">Registration Plate</th>
+                                            <th class="pb-3">Car Details</th>
+                                            <th class="pb-3 text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vehicleDirectoryTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-600 dark:text-slate-300 font-medium">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="section-bookings" class="hidden space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm theme-transition h-fit">
+                            <h3 class="font-bold text-sm text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i class="fa-solid fa-calendar-plus text-orange-500"></i> Book Service Slot</h3>
+                            <form id="bookingForm" onsubmit="handleCreateBooking(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Target Vehicle Profile</label>
+                                    <select id="bookingVehicleSelect" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs focus:outline-none dark:text-white">
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Assigned Service Package</label>
+                                    <select id="bookingServiceSelect" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs focus:outline-none dark:text-white">
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Target Date</label>
+                                        <input type="date" id="bookingDate" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs focus:outline-none dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Time Window</label>
+                                        <select id="bookingTime" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs focus:outline-none dark:text-white">
+                                            <option value="09:00 AM">09:00 AM</option>
+                                            <option value="11:00 AM">11:00 AM</option>
+                                            <option value="02:00 PM">02:00 PM</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full bg-orange-500 text-white text-xs font-semibold py-3 rounded-xl shadow-lg cursor-pointer">Register Appointment Slot</button>
+                            </form>
+                        </div>
+
+                        <div class="lg:col-span-2 bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm theme-transition">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 id="bookingQueueTitle" class="font-bold text-sm text-slate-800 dark:text-white">Master Queue Summary</h3>
+                                <select id="filterStatusSelect" onchange="filterAppointments()" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] p-2 rounded-xl dark:text-white focus:outline-none font-medium">
+                                    <option value="ALL">All Status Tracking</option>
+                                    <option value="Pending">Pending Validation</option>
+                                    <option value="Approved">Approved / Active</option>
+                                    <option value="Completed">Completed Jobs</option>
+                                    <option value="Cancelled">Cancelled Logs</option>
+                                </select>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="text-slate-400 dark:text-slate-500 uppercase text-[9px] font-bold tracking-wider border-b border-slate-100 dark:border-slate-800">
+                                            <th class="pb-3">Vehicle Info</th>
+                                            <th class="pb-3">Assigned Care Pack</th>
+                                            <th class="pb-3">Time Window</th>
+                                            <th class="pb-3">Status Label</th>
+                                            <th class="pb-3 text-right staff-admin-action">Action Control</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="appointmentQueueTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-600 dark:text-slate-300 font-medium">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="section-history" class="hidden space-y-6">
+                    <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm theme-transition">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                            <div>
+                                <h3 class="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-orange-500"></i> Archived Service History Files</h3>
+                                <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Chronological historical logs of all fully processed maintenance and diagnostics checkouts</p>
+                            </div>
+                            <input type="text" id="searchHistoryInput" oninput="renderServiceHistory()" class="w-full md:w-64 bg-slate-50 dark:bg-slate-800 text-xs px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none dark:text-white" placeholder="Filter logs by plate number or package...">
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="text-slate-400 dark:text-slate-500 uppercase text-[9px] font-bold tracking-wider border-b border-slate-100 dark:border-slate-800">
+                                        <th class="pb-3">Completion Date</th>
+                                        <th class="pb-3">Vehicle Identifier</th>
+                                        <th class="pb-3">Service Rendered</th>
+                                        <th class="pb-3">Gross Payment</th>
+                                        <th class="pb-3 text-center">Status Matrix</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="serviceHistoryTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-600 dark:text-slate-300 font-medium">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="section-catalog" class="hidden space-y-6">
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm theme-transition">
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-800 dark:text-white">Active Service Pricing Menu</h3>
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Configuration mapping options.</p>
+                        </div>
+                        <button id="addCatalogBtn" onclick="alert('Authorized Command Execution Saved.')" class="bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-xl cursor-pointer">
+                            Add New Bundle Tier
+                        </button>
+                    </div>
+                    <div id="catalogGridDisplay" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        </div>
+                </section>
+
+                <section id="section-reports" class="hidden space-y-6">
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm text-center max-w-xl mx-auto space-y-6 my-4 theme-transition">
+                        <div class="w-14 h-14 bg-orange-50 dark:bg-orange-950/20 text-orange-500 rounded-full flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-800 dark:text-white font-heading">On-Demand Operational Document Center</h3>
+                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Compile real-time structured overview file receipts. Instantly creates print-ready invoice formats based on current database state arrays.</p>
+                        </div>
+                        <div class="grid grid-cols-1 gap-3 pt-2 text-left">
+                            <button onclick="compileLiveSystemDocument('Executive Workshop Operations Ledger')" class="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer">
+                                <span><i class="fa-solid fa-file-shield text-orange-500 mr-2"></i> Export Main Diagnostic Invoice Sheet</span>
+                                <i class="fa-solid fa-chevron-right text-slate-400 text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="printInvoiceArea" class="hidden p-8 bg-white text-slate-900 font-sans">
+        <div class="flex justify-between items-start border-b-2 border-slate-200 pb-6">
+            <div>
+                <h1 class="text-2xl font-bold font-heading uppercase text-orange-600">AutoCare Hub Report</h1>
+                <p class="text-xs text-slate-500 mt-1">System Operation Authorization Invoice Voucher</p>
+                <p id="printReportTimestamp" class="text-[11px] text-slate-400 mt-0.5"></p>
+            </div>
+            <div class="text-right text-xs">
+                <p class="font-bold text-slate-800">AutoCare Operations, Inc.</p>
+                <p class="text-slate-500">Kota Bharu, Kelantan</p>
+                <p class="text-slate-500">Malaysia</p>
+            </div>
+        </div>
+        
+        <div class="my-6 grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl text-xs">
+            <div>
+                <p class="font-bold uppercase text-slate-400 tracking-wide text-[9px]">Requested By:</p>
+                <p id="printRequestorName" class="font-bold text-slate-800 text-sm mt-0.5"></p>
+                <p id="printRequestorRole" class="text-slate-500 uppercase text-[10px] font-medium mt-0.5"></p>
+            </div>
+            <div class="text-right">
+                <p class="font-bold uppercase text-slate-400 tracking-wide text-[9px]">Document Reference Key:</p>
+                <p id="printReportSerial" class="font-mono font-bold text-slate-800 text-sm mt-0.5"></p>
+                <p class="text-emerald-600 font-bold uppercase text-[10px] mt-0.5"><i class="fa-solid fa-circle-check"></i> Live Database Verified</p>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Compiled Data Matrix Records</h3>
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="bg-slate-900 text-white uppercase text-[9px] font-bold tracking-wider">
+                        <th class="p-2 rounded-l-md">Registration/Plate</th>
+                        <th class="p-2">Owner Profile</th>
+                        <th class="p-2">Assigned Package</th>
+                        <th class="p-2 text-right rounded-r-md">Status Index</th>
+                    </tr>
+                </thead>
+                <tbody id="printInvoiceTableBody" class="divide-y divide-slate-200 font-medium text-slate-700">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="mt-8 pt-4 border-t border-slate-200 flex justify-between items-center text-xs">
+            <div>
+                <p class="font-bold text-slate-800">System Endorsement Certification</p>
+                <p class="text-[11px] text-slate-400">Generated securely directly via the encrypted mobile core layout wrapper application.</p>
+            </div>
+            <div class="text-right bg-slate-900 text-white p-3 rounded-xl min-w-[140px]">
+                <p class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Total Operations Income</p>
+                <p id="printInvoiceTotalRevenue" class="text-lg font-bold mt-0.5 text-emerald-400">RM 0</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CORE RUNTIME STATE ARRAYS DATABASE
+        const USER_DATABASE_MAPPINGS = {
+            "admin@autocare.com": { name: "Encik Workshop Owner", role: "admin", displayRole: "System Administrator", badgeClass: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/40", icon: "fa-user-shield" },
+            "staff@autocare.com": { name: "Mohamad (Mechanic Key)", role: "staff", displayRole: "Floor Operations Desk", badgeClass: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/40", icon: "fa-user-gear" },
+            "ahmad@customer.com": { name: "Ahmad Firdaus", role: "customer", displayRole: "Verified Vehicle Client", badgeClass: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-900/40", icon: "fa-user" }
+        };
+
+        let vehicles = [
+            { id: 1, owner: "Ahmad Firdaus", phone: "0123456789", plate: "WXB 8821", brand: "Proton", model: "X50" },
+            { id: 2, owner: "Sarah Johnson", phone: "0198877665", plate: "VCD 1029", brand: "Perodua", model: "Myvi" },
+            { id: 3, owner: "Robert Lim", phone: "0172233445", plate: "KAB 552", brand: "Honda", model: "Civic" }
+        ];
+
+        let services = [
+            { id: "S1", name: "Tukar Minyak Enjin", price: 120, icon: "fa-oil-can" },
+            { id: "S2", name: "Alignment Tayar", price: 50, icon: "fa-car-side" },
+            { id: "S3", name: "Brake Service Overhaul", price: 180, icon: "fa-circle-dot" },
+            { id: "S4", name: "Aircond Service Tuning", price: 150, icon: "fa-snowflake" }
+        ];
+
+        let bookings = [
+            { id: 101, vehicleId: 1, serviceId: "S1", date: "2026-06-02", time: "10:00 AM", status: "Completed" },
+            { id: 102, vehicleId: 2, serviceId: "S3", date: "2026-06-12", time: "02:30 PM", status: "Pending" },
+            { id: 103, vehicleId: 3, serviceId: "S4", date: "2026-06-05", time: "09:00 AM", status: "Completed" },
+            { id: 104, vehicleId: 1, serviceId: "S2", date: "2026-06-09", time: "11:00 AM", status: "Completed" },
+            { id: 105, vehicleId: 1, serviceId: "S4", date: "2026-06-15", time: "04:00 PM", status: "Approved" }
+        ];
+
+        let sessionProfile = null;
+        let isSidebarCollapsed = false;
+
+        // INITIALIZE DISPLAY MATRIX RUNNER SETTINGS
+        window.addEventListener('DOMContentLoaded', () => {
+            const preservedMode = localStorage.getItem('theme');
+            if (preservedMode === 'dark' || (!preservedMode && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                applyGlobalThemeEngine('dark');
+            } else {
+                applyGlobalThemeEngine('light');
+            }
+            
+            if (window.innerWidth < 768) {
+                collapseSidebarOnMobileView();
+            }
+        });
+
+        function autofillLogin(email) {
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPassword').value = "password";
+            document.getElementById('loginErrorMsg').classList.add('hidden');
+        }
+
+        // AUTHENTICATION FLOWS CONTROLLER
+        function handleSecureLogin(event) {
+            event.preventDefault();
+            const inputEmail = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const matchingIdentity = USER_DATABASE_MAPPINGS[inputEmail];
+
+            if (matchingIdentity) {
+                sessionProfile = matchingIdentity;
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                enforceSecurityAuthorizationLayoutRules();
+            } else {
+                document.getElementById('loginErrorMsg').classList.remove('hidden');
+            }
+        }
+
+        function handleSecureLogout() {
+            sessionProfile = null;
+            document.getElementById('authForm').reset();
+            document.getElementById('appContainer').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+        }
+
+        // LIGHT/DARK THEME ENGINE COMMANDS
+        function toggleGlobalDisplayTheme() {
+            const hasDarkClassActive = document.documentElement.classList.contains('dark');
+            applyGlobalThemeEngine(hasDarkClassActive ? 'light' : 'dark');
+        }
+
+        function applyGlobalThemeEngine(mode) {
+            const themeIcon = document.getElementById('themeToggleIcon');
+            if (mode === 'dark') {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                if (themeIcon) themeIcon.className = "fa-solid fa-sun text-amber-400";
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                if (themeIcon) themeIcon.className = "fa-solid fa-moon text-slate-600";
+            }
+        }
+
+        // COLLAPSIBLE SIDEBAR STRUCTURE ENGINE
+        function toggleSidebarMenuLayout() {
+            const sideNav = document.getElementById('sideNav');
+            if (isSidebarCollapsed) {
+                sideNav.classList.remove('-translate-x-full', 'md:hidden');
+                sideNav.classList.add('translate-x-0');
+                isSidebarCollapsed = false;
+            } else {
+                sideNav.classList.remove('translate-x-0');
+                sideNav.classList.add('-translate-x-full', 'md:hidden');
+                isSidebarCollapsed = true;
+            }
+        }
+
+        function collapseSidebarOnMobileView() {
+            const sideNav = document.getElementById('sideNav');
+            sideNav.classList.add('-translate-x-full', 'md:hidden');
+            isSidebarCollapsed = true;
+        }
+
+        function enforceSecurityAuthorizationLayoutRules() {
+            const badge = document.getElementById('roleBadge');
+            const footName = document.getElementById('footerUserName');
+            const footIcon = document.getElementById('userProfileFooterIcon');
+
+            badge.innerText = sessionProfile.displayRole;
+            badge.className = `text-[9px] md:text-xs font-bold px-2 py-0.5 rounded-full border tracking-wide uppercase ${sessionProfile.badgeClass}`;
+            if (footName) footName.innerText = sessionProfile.name;
+            if (footIcon) footIcon.className = `fa-solid ${sessionProfile.icon}`;
+
+            document.getElementById('nav-customers').classList.remove('hidden');
+            document.getElementById('nav-reports').classList.remove('hidden');
+
+            if (sessionProfile.role === 'staff') {
+                document.getElementById('nav-reports').classList.add('hidden');
+            } else if (sessionProfile.role === 'customer') {
+                document.getElementById('nav-customers').classList.add('hidden');
+            }
+
+            switchSection('dashboard');
+            renderAllSystemDataRows();
+        }
+
+        function switchSection(sectionId) {
+            if (window.innerWidth < 768) {
+                collapseSidebarOnMobileView();
+            }
+            const sections = ['dashboard', 'customers', 'bookings', 'history', 'catalog', 'reports'];
+            sections.forEach(s => {
+                const el = document.getElementById(`section-${s}`);
+                if (el) el.classList.add('hidden');
+                const nav = document.getElementById(`nav-${s}`);
+                if (nav) nav.className = "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all";
+            });
+
+            const targetSection = document.getElementById(`section-${sectionId}`);
+            if (targetSection) targetSection.classList.remove('hidden');
+            
+            const targetNav = document.getElementById(`nav-${sectionId}`);
+            if (targetNav) targetNav.className = "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-white bg-orange-500 shadow-lg shadow-orange-500/20 transition-all";
+
+            const titleHeaderString = {
+                dashboard: "Dashboard Overview",
+                customers: "Vehicle Directory File",
+                bookings: "Service Scheduler Engine",
+                history: "Vehicle Service History Matrix",
+                catalog: "Service Pricing Bundles",
+                reports: "Operational Document Center"
+            };
+            document.getElementById('pageTitle').innerText = titleHeaderString[sectionId];
+        }
+
+        function renderAllSystemDataRows() {
+            renderDashboardQueue();
+            renderVehicleDirectory();
+            renderBookingOptionsFormAndHistory();
+            renderServiceHistory();
+            renderCatalogGrid();
+            updateAnalyticalSummaryMetrics();
+        }
+
+        // DYNAMIC CONSOLE DATA INJECTIONS LOOP MAPPINGS
+        function renderDashboardQueue() {
+            const tbody = document.getElementById('dashboardTableBody');
+            tbody.innerHTML = "";
+            const clientHideHeaders = document.querySelectorAll('.text-cust-hide');
+
+            if (sessionProfile.role === 'customer') {
+                clientHideHeaders.forEach(el => el.classList.add('hidden'));
+                document.getElementById('tableGridTitle').innerHTML = `<i class="fa-solid fa-clock text-orange-500"></i> My Active Vehicles Intake Status`;
+            } else {
+                clientHideHeaders.forEach(el => el.classList.remove('hidden'));
+                document.getElementById('tableGridTitle').innerHTML = `<i class="fa-solid fa-clock text-orange-500"></i> Active Service Intake Line`;
+            }
+
+            // Exclude completed or cancelled from active runtime tracker overview card lists
+            const activeQueue = bookings.filter(b => b.status === 'Pending' || b.status === 'Approved');
+
+            activeQueue.forEach(b => {
+                const veh = vehicles.find(v => v.id === b.vehicleId);
+                const ser = services.find(s => s.id === b.serviceId);
+                if (!veh || !ser) return;
+
+                if (sessionProfile.role === 'customer' && veh.owner !== sessionProfile.name) return;
+
+                let stateBadgeColor = b.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30' : 'bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 border-amber-100 dark:border-amber-900/30';
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100 dark:border-slate-800">
+                        <td class="py-3 font-mono font-bold text-slate-900 dark:text-white">${veh.plate}</td>
+                        <td class="py-3 text-cust-hide ${sessionProfile.role === 'customer' ? 'hidden' : ''}">${veh.owner}</td>
+                        <td class="py-3 text-xs text-slate-500 dark:text-slate-400">${ser.name}</td>
+                        <td class="py-3"><span class="px-2 py-0.5 border text-[9px] uppercase font-bold rounded-full ${stateBadgeColor}">${b.status}</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderVehicleDirectory(filterText = "") {
+            const tbody = document.getElementById('vehicleDirectoryTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = "";
+
+            const filtered = vehicles.filter(v => v.plate.toLowerCase().includes(filterText.toLowerCase()) || v.owner.toLowerCase().includes(filterText.toLowerCase()));
+
+            filtered.forEach(v => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100 dark:border-slate-800">
+                        <td class="py-3">
+                            <p class="font-bold text-slate-800 dark:text-white text-xs">${v.owner}</p>
+                            <p class="text-[10px] text-slate-400"><i class="fa-solid fa-phone"></i> ${v.phone}</p>
+                        </td>
+                        <td class="py-3 font-mono text-xs font-bold text-slate-900 dark:text-white">${v.plate}</td>
+                        <td class="py-3 text-xs text-slate-500 dark:text-slate-400">${v.brand} ${v.model}</td>
+                        <td class="py-3 text-center">
+                            <button onclick="handleDeleteVehicle(${v.id})" class="text-slate-400 hover:text-red-500 p-1 cursor-pointer"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function filterVehicleDirectory() {
+            renderVehicleDirectory(document.getElementById('searchVehicleInput').value);
+        }
+
+        function handleRegisterVehicle(e) {
+            e.preventDefault();
+            vehicles.push({
+                id: Date.now(),
+                owner: document.getElementById('regName').value,
+                phone: document.getElementById('regPhone').value,
+                plate: document.getElementById('regPlate').value.toUpperCase(),
+                brand: document.getElementById('regBrand').value,
+                model: document.getElementById('regModel').value
+            });
+            document.getElementById('vehicleRegForm').reset();
+            renderAllSystemDataRows();
+        }
+
+        function handleDeleteVehicle(id) {
+            vehicles = vehicles.filter(v => v.id !== id);
+            renderAllSystemDataRows();
+        }
+
+        function renderBookingOptionsFormAndHistory() {
+            const vSelect = document.getElementById('bookingVehicleSelect');
+            const sSelect = document.getElementById('bookingServiceSelect');
+            if(!vSelect || !sSelect) return;
+
+            let allowedVehicles = (sessionProfile.role === 'customer') ? vehicles.filter(v => v.owner === sessionProfile.name) : vehicles;
+
+            vSelect.innerHTML = allowedVehicles.map(v => `<option value="${v.id}">${v.plate} (${v.brand} ${v.model})</option>`).join('');
+            sSelect.innerHTML = services.map(s => `<option value="${s.id}">${s.name} - RM ${s.price}</option>`).join('');
+
+            filterAppointments();
+        }
+
+        function filterAppointments() {
+            const statusFilter = document.getElementById('filterStatusSelect').value;
+            const tbody = document.getElementById('appointmentQueueTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = "";
+            const controlHeaders = document.querySelectorAll('.staff-admin-action');
+
+            if (sessionProfile.role === 'customer') {
+                document.getElementById('bookingQueueTitle').innerText = "My Booking Tracking Log";
+                controlHeaders.forEach(el => el.classList.add('hidden'));
+            } else {
+                document.getElementById('bookingQueueTitle').innerText = "Master Appointment Queue Logs";
+                controlHeaders.forEach(el => el.classList.remove('hidden'));
+            }
+
+            bookings.forEach(b => {
+                if (statusFilter !== "ALL" && b.status !== statusFilter) return;
+
+                const veh = vehicles.find(v => v.id === b.vehicleId);
+                const ser = services.find(s => s.id === b.serviceId);
+                if (!veh || !ser) return;
+
+                if (sessionProfile.role === 'customer' && veh.owner !== sessionProfile.name) return;
+
+                let stateBadgeColor = b.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30' : b.status === 'Pending' ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 border-amber-100 dark:border-amber-900/30' : b.status === 'Completed' ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400 border-blue-100 dark:border-blue-900/30' : 'bg-slate-100 text-slate-500 border-slate-200';
+
+                let executionControls = ``;
+                if (sessionProfile.role === 'admin' || sessionProfile.role === 'staff') {
+                    executionControls = `
+                        <div class="flex gap-1 justify-end">
+                            ${b.status === 'Pending' ? `<button onclick="updateBookingStatus(${b.id}, 'Approved')" class="bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded cursor-pointer">Approve</button>` : ''}
+                            ${b.status === 'Approved' ? `<button onclick="updateBookingStatus(${b.id}, 'Completed')" class="bg-blue-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded cursor-pointer">Complete</button>` : ''}
+                            ${b.status !== 'Cancelled' && b.status !== 'Completed' ? `<button onclick="updateBookingStatus(${b.id}, 'Cancelled')" class="border border-slate-200 text-slate-400 text-[9px] px-1.5 py-0.5 rounded hover:text-red-500 cursor-pointer">Cancel</button>` : '<span class="text-[11px] text-slate-400 italic">Historical Log</span>'}
+                        </div>
+                    `;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100 dark:border-slate-800">
+                        <td class="py-3">
+                            <p class="font-bold text-slate-800 dark:text-white font-mono text-xs">${veh.plate}</p>
+                            <p class="text-[10px] text-slate-400 ${sessionProfile.role === 'customer' ? 'hidden' : ''}">${veh.owner}</p>
+                        </td>
+                        <td class="py-3 text-xs">
+                            <p class="text-slate-700 dark:text-slate-200 font-semibold leading-none">${ser.name}</p>
+                            <span class="text-orange-500 text-[11px] font-bold">RM ${ser.price}</span>
+                        </td>
+                        <td class="py-3 text-[10px] text-slate-500">
+                            <div>${b.date}</div><div>${b.time}</div>
+                        </td>
+                        <td class="py-3"><span class="px-1.5 py-0.5 border text-[9px] font-bold rounded-full ${stateBadgeColor}">${b.status}</span></td>
+                        <td class="py-3 text-right staff-admin-action ${sessionProfile.role === 'customer' ? 'hidden' : ''}">${executionControls}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function handleCreateBooking(e) {
+            e.preventDefault();
+            bookings.push({
+                id: Date.now(),
+                vehicleId: parseInt(document.getElementById('bookingVehicleSelect').value),
+                serviceId: document.getElementById('bookingServiceSelect').value,
+                date: document.getElementById('bookingDate').value,
+                time: document.getElementById('bookingTime').value,
+                status: "Pending"
+            });
+            document.getElementById('bookingForm').reset();
+            renderAllSystemDataRows();
+        }
+
+        function updateBookingStatus(id, nextStatus) {
+            const targetBooking = bookings.find(b => b.id === id);
+            if (targetBooking) targetBooking.status = nextStatus;
+            renderAllSystemDataRows();
+        }
+
+        // ============================================
+        // MOTOR VEHICLE COMPREHENSIVE SERVICE HISTORY LOGS
+        // ============================================
+        function renderServiceHistory() {
+            const tbody = document.getElementById('serviceHistoryTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = "";
+            const searchKeyword = document.getElementById('searchHistoryInput')?.value.toLowerCase() || "";
+
+            // Filter data store for historical execution logs (Completed statuses)
+            const historicalRecords = bookings.filter(b => b.status === 'Completed');
+
+            historicalRecords.forEach(b => {
+                const veh = vehicles.find(v => v.id === b.vehicleId);
+                const ser = services.find(s => s.id === b.serviceId);
+                if (!veh || !ser) return;
+
+                // Security Authorization scoping boundaries
+                if (sessionProfile.role === 'customer' && veh.owner !== sessionProfile.name) return;
+
+                // String validation metric parameter matcher filters
+                const matchesSearch = veh.plate.toLowerCase().includes(searchKeyword) || 
+                                      veh.owner.toLowerCase().includes(searchKeyword) || 
+                                      ser.name.toLowerCase().includes(searchKeyword);
+                if (!matchesSearch) return;
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100 dark:border-slate-800 text-xs">
+                        <td class="py-3 text-slate-500 dark:text-slate-400 font-mono">${b.date}</td>
+                        <td class="py-3">
+                            <p class="font-bold text-slate-800 dark:text-white font-mono">${veh.plate}</p>
+                            <p class="text-[10px] text-slate-400">${veh.owner} • ${veh.brand} ${veh.model}</p>
+                        </td>
+                        <td class="py-3 text-slate-700 dark:text-slate-200">
+                            <i class="fa-solid ${ser.icon} text-orange-500 mr-1.5"></i>${ser.name}
+                        </td>
+                        <td class="py-3 font-bold text-emerald-600 dark:text-emerald-400">RM ${ser.price}</td>
+                        <td class="py-3 text-center">
+                            <span class="px-2 py-0.5 border text-[9px] uppercase font-bold rounded-full bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30">
+                                <i class="fa-solid fa-circle-check text-[8px] mr-1"></i>Settled
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderCatalogGrid() {
+            const grid = document.getElementById('catalogGridDisplay');
+            if(!grid) return;
+            grid.innerHTML = "";
+            
+            if (sessionProfile.role === 'admin') document.getElementById('addCatalogBtn').classList.remove('hidden');
+            else document.getElementById('addCatalogBtn').classList.add('hidden');
+
+            services.forEach(s => {
+                grid.innerHTML += `
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col justify-between theme-transition">
+                        <div>
+                            <div class="w-8 h-8 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg flex items-center justify-center text-xs mb-3">
+                                <i class="fa-solid ${s.icon}"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-800 dark:text-white text-xs leading-tight">${s.name}</h4>
+                        </div>
+                        <div class="flex justify-between items-center mt-4 pt-2 border-t border-slate-50 dark:border-slate-800">
+                            <span class="text-[10px] text-slate-400">Fixed Tier</span>
+                            <span class="text-xs font-bold text-slate-800 dark:text-white">RM ${s.price}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateAnalyticalSummaryMetrics() {
+            const financialCard = document.getElementById('financialCard');
+            const diagnosticCard = document.getElementById('diagnosticCard');
+            const totalCustLabel = document.getElementById('totalCustLabel');
+            const totalBookingLabel = document.getElementById('totalBookingLabel');
+            
+            if(!financialCard) return;
+
+            financialCard.classList.add('hidden');
+            if(diagnosticCard) diagnosticCard.classList.remove('hidden');
+            totalCustLabel.innerText = "Total Active Clients";
+            totalBookingLabel.innerText = "Bookings Slotted";
+
+            if (sessionProfile.role === 'admin') {
+                financialCard.classList.remove('hidden');
+                document.getElementById('stat-customers').innerText = vehicles.length;
+                document.getElementById('stat-bookings').innerText = bookings.length;
+            } else if (sessionProfile.role === 'staff') {
+                document.getElementById('stat-customers').innerText = vehicles.length;
+                document.getElementById('stat-bookings').innerText = bookings.length;
+            } else if (sessionProfile.role === 'customer') {
+                if(diagnosticCard) diagnosticCard.classList.add('hidden');
+                totalCustLabel.innerText = "My Registered Cars";
+                totalBookingLabel.innerText = "My Active Appointments";
+
+                const myVehCount = vehicles.filter(v => v.owner === sessionProfile.name).length;
+                const myBookCount = bookings.filter(b => {
+                    const v = vehicles.find(veh => veh.id === b.vehicleId);
+                    return v && v.owner === sessionProfile.name && (b.status === 'Pending' || b.status === 'Approved');
+                }).length;
+
+                document.getElementById('stat-customers').innerText = myVehCount;
+                document.getElementById('stat-bookings').innerText = myBookCount;
+            }
+            
+            let accumulatedRevenue = 0;
+            bookings.forEach(b => {
+                if (b.status === 'Completed') {
+                    const sData = services.find(s => s.id === b.serviceId);
+                    if (sData) accumulatedRevenue += sData.price;
+                }
+            });
+            document.getElementById('stat-revenue').innerText = "RM " + accumulatedRevenue;
+        }
+
+        // DYNAMIC REAL PDF REPORT COMPILATION ENGINE
+        function compileLiveSystemDocument(reportTitleName) {
+            const printTableBody = document.getElementById('printInvoiceTableBody');
+            printTableBody.innerHTML = "";
+
+            const currentTimestamp = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kuala_Lumpur' });
+            document.getElementById('printReportTimestamp').innerText = `Compiled: ${currentTimestamp} (MYT)`;
+            document.getElementById('printRequestorName').innerText = sessionProfile.name;
+            document.getElementById('printRequestorRole').innerText = sessionProfile.displayRole;
+            document.getElementById('printReportSerial').innerText = `AC-LOG-${Math.floor(100000 + Math.random() * 900000)}`;
+
+            let calculatedTotal = 0;
+
+            bookings.forEach(b => {
+                const veh = vehicles.find(v => v.id === b.vehicleId);
+                const ser = services.find(s => s.id === b.serviceId);
+                if (!veh || !ser) return;
+
+                if (sessionProfile.role === 'customer' && veh.owner !== sessionProfile.name) return;
+
+                calculatedTotal += ser.price;
+
+                printTableBody.innerHTML += `
+                    <tr class="border-b border-slate-200 text-[11px]">
+                        <td class="p-2 font-mono font-bold">${veh.plate}</td>
+                        <td class="p-2">${veh.owner} (${veh.brand} ${veh.model})</td>
+                        <td class="p-2">${ser.name} (RM ${ser.price})</td>
+                        <td class="p-2 text-right font-bold uppercase">${b.status}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('printInvoiceTotalRevenue').innerText = `RM ${calculatedTotal}`;
+
+            const printArea = document.getElementById('printInvoiceArea');
+            printArea.classList.remove('hidden');
+            window.print();
+            printArea.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
